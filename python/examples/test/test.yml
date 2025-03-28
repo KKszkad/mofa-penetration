@@ -1,0 +1,32 @@
+nodes:
+  - id: terminal-input
+    build: pip install -e ../../node-hub/terminal-input
+    path: dynamic
+    outputs:
+    - data
+    inputs:
+      tag1: test_agent1/tag1
+      tag2: test_agent2/tag2
+
+  - id: test_agent1
+    build: pip install -e ../../agent-hub/test_agent1
+    path: test_agent1
+    outputs:
+    - tag1
+    inputs:
+      query: terminal-input/data
+    env:
+      WRITE_LOG: true
+      IS_DATAFLOW_END: false
+
+  - id: test_agent2
+    build: pip install -e ../../agent-hub/test_agent2
+    path: test_agent2
+    outputs:
+    - tag2
+    inputs:
+      query: terminal-input/data
+      tag1: test_agent1/tag1
+    env:
+      IS_DATAFLOW_END: true
+      WRITE_LOG: true

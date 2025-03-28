@@ -1,0 +1,64 @@
+nodes:
+  - id: terminal-input
+    build: pip install -e ../../node-hub/terminal-input
+    path: dynamic
+    outputs:
+    - data
+    inputs:
+      plan: make_plan/plan
+      deduction: check_content/deduction
+      conclusion: conclude_result/conclusion
+      #! for test
+      # outline: search_outline/web_page_outline
+      
+
+  - id: make_plan
+    build: pip install -e ../../agent-hub/make_plan
+    path: make_plan
+    outputs:
+    - plan
+    inputs:
+      query: terminal-input/data
+    env:
+      WRITE_LOG: true
+      IS_DATAFLOW_END: false
+
+  - id: search_outline
+    build: pip install -e ../../agent-hub/search_outline
+    path: search_outline
+    outputs:
+    - web_page_outline
+    inputs:
+      # query: terminal-input/data
+      plan: make_plan/plan
+    env:
+      # IS_DATAFLOW_END: true
+      IS_DATAFLOW_END: false
+      WRITE_LOG: true
+
+  - id: check_content
+    build: pip install -e ../../agent-hub/check_content
+    path: check_content
+    outputs:
+    - web_page_content
+    - deduction
+    inputs:
+      query: terminal-input/data
+      plan: make_plan/plan
+      web_page_outline: search_outline/web_page_outline
+    env:
+      IS_DATAFLOW_END: false
+      WRITE_LOG: true
+
+  - id: conclude_result
+    build: pip install -e ../../agent-hub/conclude_result
+    path: conclude_result
+    outputs:
+    - conclusion
+    inputs:
+      query: terminal-input/data
+      plan: make_plan/plan
+      web_page_content: check_content/web_page_content
+    env:
+      IS_DATAFLOW_END: true
+      WRITE_LOG: true
