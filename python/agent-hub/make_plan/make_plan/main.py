@@ -1,15 +1,55 @@
 from mofa.agent_build.base.base_agent import MofaAgent, run_agent
+from openai import OpenAI
+import os
+from dotenv import load_dotenv
+def process(query):
 
-def process():
-    return "预处理用户输入，并制定搜索计划。"
+    load_dotenv('.env.secret')
+
+    client = OpenAI(
+        api_key=os.getenv('[API-KEY]'),
+        base_url=os.getenv('[API-URL]')
+    )
+
+    system_prompt = """
+    用户向搜索引擎输入了搜索词，请分析用户的搜索意图，此部分为schedule，并给出三条拓展、优化过后的搜索词，可以使用搜索引擎的特殊语法，此部分为search_words。
+
+    输入示例：
+    如何变强
+
+    输出示例：
+    {
+    "schedule": "用户可能正在寻找提升自身能力、技能或身体素质的方法，可能涉及个人成长、健身、学习技巧等方面。",
+    "search_words": [
+        "如何快速提升个人能力",
+        "健身增肌训练计划",
+        "高效学习方法与技巧"
+    ]
+    }
+
+    """
+
+    response = client.chat.completions.create(
+        model=os.getenv('[LLM-MODEL]'),
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": query}
+        ],
+        stream=False
+    )
+    return response.choices[0].message.content
+
+
+
+
 
 @run_agent
 def run(agent:MofaAgent):
-    task = agent.receive_parameter('query')
+    query = agent.receive_parameter('query')
     
     # TODO: 在下面添加你的Agent代码,其中agent_inputs是你的Agent的需要输入的参数
     agent_output_name = 'plan'
-    plan = process()
+    plan = process(query)
 
     agent.send_output(agent_output_name=agent_output_name,agent_result=plan)
 def main():
