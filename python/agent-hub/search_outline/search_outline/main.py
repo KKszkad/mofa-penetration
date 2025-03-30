@@ -1,11 +1,15 @@
 from mofa.agent_build.base.base_agent import MofaAgent, run_agent
 import requests
-import json
+import json, configparser
 
 def process(plan):
     
+    config = configparser.ConfigParser()
+    config.read('settings.ini')
+    search_engine_base_url = config.get('search-engine', 'base-url')
+
     #！ 此处使用本地部署的searXNG元搜索引擎
-    searxng_url = 'http://127.0.0.1:4567'
+    searxng_url = search_engine_base_url
     plan_json = json.loads(plan)
     # 拼接大模型帮助生成的搜索词，保证全面,采用or来连接。
     query = ' or '.join(plan_json['search_words'])

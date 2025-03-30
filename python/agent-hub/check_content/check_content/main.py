@@ -1,7 +1,6 @@
 from mofa.agent_build.base.base_agent import MofaAgent, run_agent
-
 from openai import OpenAI
-import json
+import json, configparser
 
     # outputs:
     # # - web_page_content
@@ -31,9 +30,15 @@ def process(query, plan_str, web_page_outline_str):
     1 3 5 7 12
     """
 
-    client = OpenAI(api_key="sk-7a27f1c4d52c46409ddcc83418d59f0a", base_url="https://api.deepseek.com")
+    config = configparser.ConfigParser()
+    config.read('settings.ini')
+    llm_base_url = config.get('llm-api', 'base-url')
+    llm_api_key = config.get('llm-api', 'api-key')
+    llm_model = config.get('llm-api', 'model')
+
+    client = OpenAI(api_key=llm_api_key, base_url=llm_base_url)
     response = client.chat.completions.create(
-        model="deepseek-chat",
+        model=llm_model,
         messages=[
             {
             "role": "system", "content":  system_prompt},
