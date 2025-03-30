@@ -8,8 +8,8 @@ nodes:
       plan: make_plan/plan
       deduction: check_content/deduction
       conclusion: conclude_result/conclusion
-      #! for test
-      # outline: search_outline/web_page_outline
+      #! for test 
+      outline: search_outline/web_page_outline
       
 
   - id: make_plan
