@@ -1,6 +1,32 @@
 from mofa.agent_build.base.base_agent import MofaAgent, run_agent
 from openai import OpenAI
 import json, configparser
+import asyncio, re
+from crawl4ai import *
+
+# 清除markdown格式的不必要字符和网页的链接以获取较为纯净的数据
+def clean_md_text(md_text):
+    # 去除 Markdown 链接
+    md_text = re.sub(r'\[.*?\]\(.*?\)', '', md_text)
+    # 去除标题符号
+    md_text = re.sub(r'^#+\s', '', md_text, flags=re.MULTILINE)
+    # 去除列表符号
+    md_text = re.sub(r'^([-*]|\d+\.)\s', '', md_text, flags=re.MULTILINE)
+    # 去除强调符号
+    md_text = re.sub(r'(\*\*|__|_|\*)', '', md_text)
+    # 去除多余的换行符和空格
+    md_text = re.sub(r'\s+', ' ', md_text).strip()
+    return md_text
+
+#Crawl4AI抓取网页数据
+async def get_pure_page_content(url_str):
+    async with AsyncWebCrawler() as crawler:
+        result = await crawler.arun(
+            url=url_str,
+        )
+        pure_content = clean_md_text(result.markdown)
+        return pure_content
+
 
     # outputs:
     # # - web_page_content
@@ -53,16 +79,19 @@ def process(query, plan_str, web_page_outline_str):
     indexes = [int(num) for num in num_str_list]    #得到目标outline的索引
 
     #TODO 后续用 目前回传的deduction和web_page_content都是 选定的网页概览信息
-    # # 获取确定的结果url
+    # 获取确定的结果url
     # urls = []
     # for index in indexes:
     #     urls.append(web_page_outline[index - 1]['url'])
-
-    #TODO 后续爬虫完成后替换真正的deduction 和 web_page_content
+    
+    # web_page_content = []
+    # for url in urls:
+    #     web_page_content.append(get_pure_page_content(url))
     result = []
     for index in indexes:
         result.append(web_page_outline[index-1])
-    
+
+    # return web_page_content
     return result
 
 @run_agent
