@@ -1,18 +1,24 @@
 from mofa.agent_build.base.base_agent import MofaAgent, run_agent
 from openai import OpenAI
 import os
+import json
 from dotenv import load_dotenv
 def process(query):
 
-    load_dotenv('.env.secret')
+    # load_dotenv('.env.secret')
 
+    # client = OpenAI(
+    #     api_key=os.getenv('[API-KEY]'),
+    #     base_url=os.getenv('[API-URL]')
+    # )
     client = OpenAI(
-        api_key=os.getenv('[API-KEY]'),
-        base_url=os.getenv('[API-URL]')
+        api_key ='sk-7a27f1c4d52c46409ddcc83418d59f0a',
+        base_url = 'https://api.deepseek.com'
     )
 
     system_prompt = """
     用户向搜索引擎输入了搜索词，请分析用户的搜索意图，此部分为schedule，并给出三条拓展、优化过后的搜索词，可以使用搜索引擎的特殊语法，此部分为search_words。
+    输出请严格按照给定格式。
 
     输入示例：
     如何变强
@@ -28,9 +34,9 @@ def process(query):
     }
 
     """
-
+    # model=os.getenv('[LLM-MODEL]'),
     response = client.chat.completions.create(
-        model=os.getenv('[LLM-MODEL]'),
+        model='deepseek-chat',
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": query}
